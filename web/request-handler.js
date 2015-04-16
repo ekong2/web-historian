@@ -3,6 +3,7 @@ var archive = require('../helpers/archive-helpers');
 var httpHelpers = require('../web/http-helpers.js');
 var qs = require('querystring');
 var fs = require('fs');
+var download = require('../workers/htmlfetcher.js');
 // require more modules/folders here!
 
 exports.handleRequest = function (req, res) {
@@ -17,13 +18,9 @@ exports.handleRequest = function (req, res) {
     } else if (req.url === '/styles.css'){
       httpHelpers.serveAssets(res, archive.paths.siteAssets + '/styles.css');
     }
-
-
-
-
-
-
-
+    // download();
+    // archive.downloadUrls();
+    // httpHelpers.serveAssets(res, archive.paths.archivedSites + '/hackreactor.html', true);
   } else if(req.method === 'POST'){
     if(req.url === '/inbound'){
       var body = "";
@@ -40,7 +37,7 @@ exports.handleRequest = function (req, res) {
         console.log('expecting true or false: ' + archive.isUrlInList(bodyFinal.url));
         if(archive.isUrlInList(bodyFinal.url)){
           if(archive.isURLArchived(bodyFinal.url)){
-            httpHelpers.serveAssets(res, exports.paths.archivedSites + '/' + url.split('.').join('') + '.html');
+            httpHelpers.serveAssets(res, archive.paths.archivedSites + '/' + bodyFinal.url.split('.').join('') + '.html');
           }else{
             console.log('not yet archived, wait for bot');
             httpHelpers.serveAssets(res, archive.paths.loading);
@@ -54,10 +51,6 @@ exports.handleRequest = function (req, res) {
     }
   }
   else {
-
       res.end(archive.paths.list);
   }
-
-
-
 };

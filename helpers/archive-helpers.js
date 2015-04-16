@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var http = require('http-request');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -11,7 +12,7 @@ var _ = require('underscore');
 
 exports.paths = {
   'siteAssets' : path.join(__dirname, '../web/public'),
-  'archivedSites' : path.join(__dirname, '../archives/sites'),
+  'archivedSites' : path.join(__dirname, '../web/archives/sites'),
   'list' : path.join(__dirname, '../web/archives/sites.txt'),
   'home' : path.join(__dirname, '../web/public/index.html'),
   'loading' : path.join(__dirname, '../web/public/loading.html')
@@ -42,7 +43,7 @@ exports.isUrlInList = function(url){
 };
 
 exports.addUrlToList = function(data){
-  fs.appendFile(exports.paths.list, data, function(error){
+  fs.appendFile(exports.paths.list, data + '\n', function(error){
     if (error){
       throw err;
     } else {
@@ -57,15 +58,28 @@ exports.isURLArchived = function(url){
 };
 
 exports.readListOfUrls = function(){
-  fs.readFile(exports.paths.list, function(err, data){
-    if (err){
-      console.log(err);
-    } else {
-      //do something with data
+  // fs.readFile(exports.paths.list, function(err, data){
+  //   if (err){
+  //     console.log(err);
+  //   } else {
+  //     //do something with data
 
-    }
-  });
+  //   }
+  // });
+  return fs.readFileSync(exports.paths.list).toString().split('\n');
 };
 
-exports.downloadUrls = function(){
+exports.downloadUrls = function(url){
+  http.get({
+    url: url,
+    progress: function (current, total) {
+      console.log('downloaded %d bytes from %d', current, total);
+    }
+  }, exports.paths.archivedSites + '/' + url.split('.').join('') + '.html', function (err, res) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(res.code, res.headers, res.file);
+  });
 };
